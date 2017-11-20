@@ -50,7 +50,6 @@
         this.Diff = function(){
             var diffX = this.posX - this.crossX;
             var diffY = this.posY - this.crossY;
-            console.log(diffX, diffY)
             var result = Math.sqrt(diffX * diffX + diffY * diffY);
             if (diffY < 0)
                 result *= -1;
@@ -246,12 +245,6 @@
                 .attr("x2", thisobj.crossX)
                 .attr("y2", thisobj.crossY+10)
                 .style("stroke", 'black')
-
-            //cross.enter()
-            //    .append("path")
-            //    .attr('d', symbol)
-            //    .attr('stroke', 'black')
-            //    .attr('transform', 'translate('+ crossX +', '+ crossY +')');
         };
         this.Draw = function () {
             var svg = thisobj.svg;
@@ -302,6 +295,7 @@
             .style("fill", "none");
 
         balls.push(new Ball(svg, 30, 30, 'n2', 'dimgray', Math.PI / 2, 20, height));
+        balls[0].SpeedSettings(randgame() + 4);
 
         for (var i = 0; i < balls.length; ++i) {
             balls[i].Draw();
@@ -311,14 +305,58 @@
     }
 
     var startStopFlag = null;
+    var count = 0;
+    var speedcount = [0, 0, 0];
+    var speedarr = ['speed', ];
+    var diffarr = ['diff', ];
+    function randgame() {
+        count++;
+        if(count == 31){
+            return null;
+        }
+        while(true){
+            var rand = Math.floor(Math.random() * 3);
+            if (speedcount[rand] != 10){
+                speedcount[rand]++;
+                speedarr.push(rand + 4);
+                break;
+            }
+        }
+        return rand;
+    }
+    function randinit(){
+        started = false;
+        count = 0;
+        speedcount = [0, 0, 0];
+        speedarr = ['speed', ];
+        diffarr = ['diff', ];
+    }
+    var started = false;
     function StartStopGame() {
+        if(count == 31){
+            startStopFlag = 1;
+            alert("max 30 counts");
+            return;
+        }
         if (startStopFlag == null) {
             startStopFlag = 1;
-            document.getElementById('diff').innerHTML = balls[0].Diff().toString();
-            document.getElementById('startStop').innerHTML = 'Start';
-            document.getElementById('refresh').innerHTML = 'Refresh';
+            if(started){
+                var diff = balls[0].Diff();
+                diffarr.push(diff);
+                document.getElementById('startStop').innerHTML = 'Start';
+                // document.getElementById('refresh').innerHTML = 'Refresh';
+                var rand = randgame();
+                if (rand == null)
+                    StartStopGame();
+                OnSpeedChange(rand + 4);
+                // Debug code
+                // document.getElementById('diff').innerHTML = diffarr.toString() + " || " + speedarr.slice(0, -1).toString(); 
+                started = false;
+                StartStopGame();
+            }
         }
         else {
+            started = true;
             d3.timer(function () {
                 for (var i = 0; i < balls.length; ++i) {
                     balls[i].Move();
@@ -327,7 +365,7 @@
             }, 500);
             startStopFlag = null;
             document.getElementById('startStop').innerHTML = 'Stop';
-            document.getElementById('refresh').innerHTML = '';
+            // document.getElementById('refresh').innerHTML = '';
         }
     }
 
@@ -341,15 +379,12 @@
                 }
             });
 
-    function OnSpeedChange() {
-        var o = document.getElementById('speed');
+    function OnSpeedChange(newjumpSize) {
         if (startStopFlag != null)
             startStopFlag = null;
         setTimeout(function () {
             for (var i = 0; i < balls.length; ++i) {
-                var o = document.getElementById('speed');
-                newjumpSize = o.options[o.selectedIndex].value;
-                balls[i].SpeedSettings(parseInt(newjumpSize));
+                balls[i].SpeedSettings(newjumpSize);
             }
             StartStopGame();
         }, 500);
@@ -359,46 +394,73 @@
         var o = document.getElementById('speed');
         if (startStopFlag != null)
             startStopFlag = null;
+        randinit();
         setTimeout(function () {
             for (var i = 0; i < balls.length; ++i) {
                 var o = document.getElementById('slope');
                 newjumpSize = o.options[o.selectedIndex].value;
                 balls[i].SlopeSettings(parseInt(newjumpSize) * Math.PI / 180 );
             }
+            balls[0].SpeedSettings(randgame() + 4);
             StartStopGame();
+            document.getElementById('startStop').innerHTML = 'Start';
         }, 500);
     }
-    function Refresh(){
-        if (startStopFlag != null){
-            startStopFlag = null;
-            StartStopGame();
-        }
-        balls[0].refresh();
-        document.getElementById('diff').innerHTML = balls[0].Diff().toString();
+//  function Refresh(){
+//      if (startStopFlag != null){
+//          startStopFlag = null;
+//          StartStopGame();
+//      }
+//      balls[0].refresh();
+//      document.getElementById('diff').innerHTML = balls[0].Diff().toString();
+//  }
+    function download_csv() {
+        var data = [
+            speedarr,
+            diffarr,
+        ];
+        var csv = '';
+        data.forEach(function(row) {
+            csv += row.join(',');
+            csv += "\n";
+            });
+        var hiddenElement = document.createElement('a');
+        hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+        hiddenElement.target = '_blank';
+        var o = document.getElementById('slope');
+        hiddenElement.download = document.getElementById('name').value + "." + o.options[o.selectedIndex].value + '.csv';
+        hiddenElement.click();
     }
+</script>
+
 
 </script>
 <div id="mainDiv" style="width:960px; height:480px">
     <div id="drawAreaOuter" style="width:100%; height:100%;  ">
         <div id="menuTop" >
             <a id="startStop" href="javascript:StartStopGame()">Start</a> |
+            <!--
             Speed :
             <select id='speed' onchange="OnSpeedChange()">
-                <option value="1" selected="selected">Slow</option>
-                <option value="3" >Medium</option>
-                <option value="5">Fast</option>
-            </select> |
+                <option value="4" selected="selected">Slow</option>
+                <option value="5" >Medium</option>
+                <option value="6">Fast</option>
+            </select> | -->
             Slope:
             <select id='slope' onchange="OnSlopeChange()">
                 <option value="-90" selected="selected">-90</option>
-                <option value="-60" selected="selected">-60</option>
-                <option value="-30" selected="selected">-30</option>
-                <option value="0" selected="selected">0</option>
-                <option value="30" selected="selected">30</option>
-                <option value="60" selected="selected">60</option>
-                <option value="90" selected="selected">90</option>
+                <option value="-60">-60</option>
+                <option value="-30">-30</option>
+                <option value="0">0</option>
+                <option value="30">30</option>
+                <option value="60">60</option>
+                <option value="90">90</option>
             </select> |
+            Name: <input type="text" id="name"></input>
+            <button onclick="download_csv()">Download CSV</button> 
+            <!--
             <a id="refresh" href="javascript:Refresh()"></a>
+            -->
         </div>
         <div id="drawArea" style="width:100%; height:100%; border:1px solid gray">
         </div>
