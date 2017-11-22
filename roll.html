@@ -436,7 +436,7 @@
     function download_csv() {
         var bef = [
             anglearr,
-            speedarr.slice(0, -1),
+            speedarr,
             diffarr,
         ];
         var data = bef[0].map((col, i) => bef.map(row => row[i]));
