@@ -307,6 +307,7 @@
     var startStopFlag = null;
     var count = 0;
     var speedcount = [0, 0, 0];
+    var anglearr = ['angle', ];
     var speedarr = ['speed', ];
     var diffarr = ['diff', ];
     function randgame() {
@@ -329,11 +330,22 @@
         count = 0;
         speedcount = [0, 0, 0];
         speedarr = ['speed', ];
+        anglearr = ['angle', ];
         diffarr = ['diff', ];
     }
     var started = false;
+    var RealStop = false;
+    function NextStopGame() {
+        if (RealStop == true)
+            RealStop = false;
+        else
+            RealStop = true;
+    }
     function StartStopGame() {
-        if(count == 31){
+        if (RealStop && startStopFlag == 1){
+            return; 
+        }
+        if(count == 4){
             startStopFlag = 1;
             alert("max 30 counts");
             return;
@@ -342,7 +354,9 @@
             startStopFlag = 1;
             if(started){
                 var diff = balls[0].Diff();
+                var o = document.getElementById('slope');
                 diffarr.push(diff);
+                anglearr.push(o.options[o.selectedIndex].value);
                 document.getElementById('startStop').innerHTML = 'Start';
                 // document.getElementById('refresh').innerHTML = 'Refresh';
                 var rand = randgame();
@@ -369,13 +383,18 @@
         }
     }
 
-    // I always like to handle ESC key
+    // I always like to handle ENTER key
     d3.select('body')
             .on('keydown', function () {
                 if (balls.length == 0)
                     return;
-                if (d3.event.keyCode == 27) {
+                if (d3.event.keyCode == 13) {
+                    if (RealStop == true && startStopFlag == 1)
+                        RealStop = false;
                     StartStopGame();
+                }
+                if (d3.event.keyCode == 32) {
+                    NextStopGame();
                 }
             });
 
@@ -415,10 +434,12 @@
 //      document.getElementById('diff').innerHTML = balls[0].Diff().toString();
 //  }
     function download_csv() {
-        var data = [
-            speedarr,
+        var bef = [
+            anglearr,
+            speedarr.slice(0, -1),
             diffarr,
         ];
+        var data = bef[0].map((col, i) => bef.map(row => row[i]));
         var csv = '';
         data.forEach(function(row) {
             csv += row.join(',');
