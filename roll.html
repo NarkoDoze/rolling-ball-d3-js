@@ -449,7 +449,10 @@
         hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
         hiddenElement.target = '_blank';
         var o = document.getElementById('slope');
-        hiddenElement.download = document.getElementById('name').value + "." + o.options[o.selectedIndex].value + '.csv';
+        var angleval = o.options[o.selectedIndex].value;
+        if(angleval > 0)
+            angleval = "+" + angleval;
+        hiddenElement.download = document.getElementById('name').value + "." + angleval + '.csv';
         hiddenElement.click();
     }
 </script>
