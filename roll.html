@@ -6,15 +6,26 @@
 </head>
 <body>
 <script>
+    // Ball Object Define
     function Ball(svg, x, y, id, color, aoa, weight, height) {
+        // Ball object position X, Y
+        // Assigned in Quadrant 4
         this.posX = x;
         this.posY = y;
+        // Ball color
         this.color = color;
+        // Ball radius
+        // Defined in radian not degree
         this.radius = weight;
+        // Ball speed : defined (jumpSize)pixels in 1 frame
         this.jumpSize = 1;
+        // svg mean scalable vector graphics defined image by vector and pixel
         this.svg = svg;
+        // Inherence id for each ball
         this.id = id;
+        // The ball go in this angle(aoa)
         this.aoa = aoa;
+        // Defined for other object ( Line, turnel, cross symbol)
         this.weight = weight;
         this.height = height;
         this.pprime = 1;
@@ -29,9 +40,11 @@
         this.tqprime = 280;
         this.tppprime = 30 + 400;
         this.tpqprime = -29;
+        // Cross symbol position -> goal
         this.crossX = 30 + 400;
         this.crossY = 80;
 
+        // Not defined case
         if (!this.aoa)
             this.aoa = Math.PI / 7;
         if (!this.weight)
@@ -40,13 +53,20 @@
 
         this.data = [this.id];
 
+        // ITS Intuitive !
         var thisobj = this;
 
+        // calculate speed by jumpsize and angle(aoa)
         this.vx = Math.cos(thisobj.aoa) * thisobj.jumpSize;
         this.vy = Math.sin(thisobj.aoa) * thisobj.jumpSize;
+
+        // initial position
+        // We'll use agin later
         this.initialPosX = this.posX;
         this.initialPosY = this.posY;
         
+        // Return the diff between current ball position and cross symbol position
+        // Signed value can be changed in some case
         this.Diff = function(){
             var diffX = this.posX - this.crossX;
             var diffY = this.posY - this.crossY;
@@ -60,23 +80,36 @@
             return result;
         }
 
+        // SpeedSetting function 
+        // Goto Initial position
+        // Change speed of ball (vx, vy) with new jumpsize(speed of pixel)
+        // And redraw
         this.SpeedSettings = function (newjumpSize) {
             thisobj.jumpSize = newjumpSize;
             if (thisobj.aoa >= 0){
+                // Init value
                 thisobj.posX = thisobj.initialPosX;
                 thisobj.posY = thisobj.initialPosY;
             }
             else{
+                // If angle is unsigned -> the ball goes down 
                 thisobj.posX = thisobj.initialPosX;
                 thisobj.posY = thisobj.height - thisobj.initialPosY;
             }
+            // Recalculate
             thisobj.vx = Math.cos(thisobj.aoa) * newjumpSize; // velocity x
             thisobj.vy = Math.sin(thisobj.aoa) * newjumpSize; // velocity y
             thisobj.Draw();
             thisobj.LineDraw();
         };
+
+        // SlopeSetting function
+        // Goto Initial position
+        // Change speed of ball (vx, vy) with new aoa(angle)
+        // And redraw
         this.SlopeSettings = function (newaoa) {
             thisobj.aoa = newaoa;
+            // Same with SpeedSetting -> initial position
             if (newaoa >= 0){
                 thisobj.posX = thisobj.initialPosX;
                 thisobj.posY = thisobj.initialPosY;
@@ -85,12 +118,14 @@
                 thisobj.posX = thisobj.initialPosX;
                 thisobj.posY = thisobj.height - thisobj.initialPosY;
             }
+            // Recalculate
             thisobj.vx = Math.cos(newaoa) * thisobj.jumpSize;
             thisobj.vy = Math.sin(newaoa) * thisobj.jumpSize;
             thisobj.Draw();
             thisobj.LineDraw();
         };
 
+        // Not used in this version
         this.refresh = function () {
             if (thisobj.aoa >= 0){
                     thisobj.posX = thisobj.initialPosX;
@@ -105,6 +140,10 @@
             thisobj.Draw();
             thisobj.LineDraw();
         };
+
+        // line, tunnel, cross symbol
+        // All of things are consist of line
+        // Draw for each case
         this.LineDraw = function() {
             var svg = thisobj.svg;
             svg.selectAll('line').remove();
@@ -116,6 +155,7 @@
             var cross = svg.selectAll('#' + thisobj.id + "cross")
                         .data(thisobj.data);
 
+            // Define each position of start and end point of tunnel, slope
             if (thisobj.aoa > 0) {
                 this.pprime = 30 - thisobj.radius.toFixed(5) * Math.sin(thisobj.aoa);
                 this.qprime = 30 + thisobj.radius.toFixed(5) * Math.cos(thisobj.aoa);
@@ -172,6 +212,7 @@
                 this.crossX = 215;
                 this.crossY = 350.4293994;
             }
+            // TOOO LOOOOOONG
             if (thisobj.aoa == -1 * Math.PI / 3){
                this.tpprime = 115;
                this.tqprime = 302.7756814;
@@ -205,6 +246,8 @@
                this.crossY = 30 + 200;
             }
 
+            // Draw slope with silver color
+            // Use pprime, qprime, ppprime, pqprime
             line.enter()
                 .append("line")
                 .attr({"id" : + thisobj.id + "line", 'class' : 'line'})
@@ -214,6 +257,9 @@
                 .attr("y2", thisobj.pqprime)
                 .style("stroke", 'silver');
 
+            // Draw tunnel with silver color
+            // stroke-width is thickness of line -> must be bigger than circle (2 * radius)
+            // Use tpprime, tqprime, tppprime, tpqprime
             tunnel.enter()
                 .append("line")
                 .attr({"id" : + thisobj.id + "tunnel", 'class' : 'line'})
@@ -228,6 +274,8 @@
                .type('cross')
                .size(100);
 
+            // Draw Line Same Y and diff X
+            // Like -
             cross.enter()
                 .append("line")
                 .attr({"id" : + thisobj.id + "cross1", 'class' : 'line'})
@@ -237,6 +285,8 @@
                 .attr("y2", thisobj.crossY)
                 .style("stroke", 'black')
 
+            // Draw Line Same X and diff Y
+            // Like l
             cross.enter()
                 .append("line")
                 .attr({"id" : + thisobj.id + "cross2", 'class' : 'line'})
@@ -246,6 +296,8 @@
                 .attr("y2", thisobj.crossY+10)
                 .style("stroke", 'black')
         };
+
+        // Circle Draw function
         this.Draw = function () {
             var svg = thisobj.svg;
             var ball = svg.selectAll('#' + thisobj.id)
@@ -254,10 +306,13 @@
                 .append("circle")
                 .attr({"id" : thisobj.id, 'class' : 'ball', 'r' : thisobj.radius, 'weight' : thisobj.weight})
                 .style("fill", thisobj.color);
+            
             if (thisobj.aoa == Math.PI / 2 || thisobj.aoa == -1 * Math.PI / 2){
+                // Change Value when ball 90 or -90 to middle
                 thisobj.posX = 430;
             }
             if (thisobj.aoa == 0){
+                // Change Value when ball 0 to middle
                 thisobj.posY = 230;
             }
             ball
@@ -267,6 +322,8 @@
             var intersectBall = ball.enter().append('circle').attr({ 'id': thisobj.id + '_intersect', 'class': 'intersectBall' });
         };
 
+        // Just move function
+        // Change position of Ball(posX, posY) with speed(vx, vy)
         this.Move = function () {
             var svg = thisobj.svg;
             thisobj.posX += thisobj.vx;
@@ -276,12 +333,14 @@
     }
     var balls = [];
 
+    // Start with this code
     function Initialize(containerId) {
         var height = document.getElementById(containerId).clientHeight;
         var width = document.getElementById(containerId).clientWidth;
         gContainerId = containerId;
         gCanvasId = containerId + '_canvas';
         gTopGroupId = containerId + '_topGroup';
+        // Draw svg
         var svg = d3.select("#" + containerId).append("svg")
             .attr("id", gCanvasId)
             .attr("width", width)
@@ -294,9 +353,12 @@
             .attr("height", height)
             .style("fill", "none");
 
+        // Only one Ball pushed in this project
         balls.push(new Ball(svg, 30, 30, 'n2', 'dimgray', Math.PI / 2, 20, height));
+        // Speed Setted by rand
         balls[0].SpeedSettings(randgame() + 4);
 
+        // Draw!
         for (var i = 0; i < balls.length; ++i) {
             balls[i].Draw();
             balls[i].LineDraw();
@@ -304,27 +366,40 @@
         return svg;
     }
 
+    // If It stop null, start 1 
     var startStopFlag = null;
+    // total count of task
     var count = 0;
+    // Rand count if it is 10, not use that
     var speedcount = [0, 0, 0];
+    // Save task value in this variable
     var anglearr = ['angle', ];
     var speedarr = ['speed', ];
     var diffarr = ['diff', ];
+
+    // calculate Rand of Each case
     function randgame() {
         count++;
         if(count == 31){
             return null;
         }
         while(true){
+            // 0, 1, 2 random
+            // Use +4 than 4, 5, 6 speed
             var rand = Math.floor(Math.random() * 3);
+            // If you do 10 tasks, I want another value
             if (speedcount[rand] != 10){
+                // I decided to do this
                 speedcount[rand]++;
+                // Save Value
                 speedarr.push(rand + 4);
                 break;
             }
         }
         return rand;
     }
+
+    // rand value init for another experiment
     function randinit(){
         started = false;
         count = 0;
@@ -333,33 +408,50 @@
         anglearr = ['angle', ];
         diffarr = ['diff', ];
     }
+
+    // Statement for started or space button
     var started = false;
     var RealStop = false;
+    
+    // space button call this func
+    // change value like below
     function NextStopGame() {
         if (RealStop == true)
             RealStop = false;
         else
             RealStop = true;
     }
+    // Start or Stop game
     function StartStopGame() {
         if (RealStop && startStopFlag == 1){
+            // if space button pushed, stop all of task
             return; 
         }
         if(count == 31){
+            // if 30 counts in one experiment, stop all of task
+            // with alert message
             startStopFlag = 1;
             alert("max 30 counts");
             return;
         }
         if (startStopFlag == null) {
+            // if started, stop
             startStopFlag = 1;
             if(started){
+                // calculate by diff function
                 var diff = balls[0].Diff();
                 var o = document.getElementById('slope');
+                // diff save
                 diffarr.push(diff);
+                // angle save
                 anglearr.push(o.options[o.selectedIndex].value);
+                // Change letter to Start
                 document.getElementById('startStop').innerHTML = 'Start';
+                // Not used in this version
                 // document.getElementById('refresh').innerHTML = 'Refresh';
+                // get rand value
                 var rand = randgame();
+                // if rand return null, end of experiment
                 if (rand == null)
                     StartStopGame();
                 OnSpeedChange(rand + 4);
@@ -370,7 +462,9 @@
             }
         }
         else {
+            // if it stop, start
             started = true;
+            // start after 0.5s (500ms)
             d3.timer(function () {
                 for (var i = 0; i < balls.length; ++i) {
                     balls[i].Move();
@@ -383,32 +477,38 @@
         }
     }
 
-    // I always like to handle ENTER key
     d3.select('body')
             .on('keydown', function () {
                 if (balls.length == 0)
                     return;
                 if (d3.event.keyCode == 13) {
+                    // Enter Key handling
+                    // StartStopGame function called
                     if (RealStop == true && startStopFlag == 1)
                         RealStop = false;
                     StartStopGame();
                 }
                 if (d3.event.keyCode == 32) {
+                    // Space bar handling
+                    // NextGame must be stop
                     NextStopGame();
                 }
             });
 
+    // Speed change function
     function OnSpeedChange(newjumpSize) {
         if (startStopFlag != null)
             startStopFlag = null;
-        setTimeout(function () {
-            for (var i = 0; i < balls.length; ++i) {
-                balls[i].SpeedSettings(newjumpSize);
-            }
-            StartStopGame();
-        }, 500);
+            setTimeout(function () {
+                // All balls setted with new value
+                for (var i = 0; i < balls.length; ++i) {
+                    balls[i].SpeedSettings(newjumpSize);
+                }
+                StartStopGame();
+            }, 500);
     }
 
+    // Slope change function
     function OnSlopeChange() {
         var o = document.getElementById('speed');
         if (startStopFlag != null)
@@ -417,14 +517,17 @@
         setTimeout(function () {
             for (var i = 0; i < balls.length; ++i) {
                 var o = document.getElementById('slope');
-                newjumpSize = o.options[o.selectedIndex].value;
-                balls[i].SlopeSettings(parseInt(newjumpSize) * Math.PI / 180 );
+                newaoa = o.options[o.selectedIndex].value;
+                // Set with new value of new value of aoa
+                balls[i].SlopeSettings(parseInt(newaoa) * Math.PI / 180 );
             }
+            // Define new rand speed
             balls[0].SpeedSettings(randgame() + 4);
             StartStopGame();
             document.getElementById('startStop').innerHTML = 'Start';
         }, 500);
     }
+//  Not used in this version
 //  function Refresh(){
 //      if (startStopFlag != null){
 //          startStopFlag = null;
@@ -433,6 +536,8 @@
 //      balls[0].refresh();
 //      document.getElementById('diff').innerHTML = balls[0].Diff().toString();
 //  }
+
+    // Just download anglearr, speedarr, diffarr with csv
     function download_csv() {
         var bef = [
             anglearr,
@@ -452,6 +557,7 @@
         var angleval = o.options[o.selectedIndex].value;
         if(angleval > 0)
             angleval = "+" + angleval;
+        // Download name be name.anglevalue.csv
         hiddenElement.download = document.getElementById('name').value + "." + angleval + '.csv';
         hiddenElement.click();
     }
@@ -470,6 +576,8 @@
                 <option value="5" >Medium</option>
                 <option value="6">Fast</option>
             </select> | -->
+            
+            <!-- If change this option, call OnSlopeChange -->
             Slope:
             <select id='slope' onchange="OnSlopeChange()">
                 <option value="-90" selected="selected">-90</option>
@@ -481,9 +589,11 @@
                 <option value="90">90</option>
             </select> |
             Name: <input type="text" id="name"></input>
+            <!-- If click this option, call download_csv -->
             <button onclick="download_csv()">Download CSV</button> 
             <!--
-            <a id="refresh" href="javascript:Refresh()"></a>
+                Not Used in this version
+                <a id="refresh" href="javascript:Refresh()"></a>
             -->
         </div>
         <div id="drawArea" style="width:100%; height:100%; border:1px solid gray">
@@ -497,12 +607,17 @@
             <br>
             <br>
             <br>
-            <b id="diff"></b>
+            <!--
+                for debugging code
+                <b id="diff"></b>
+            -->
        </div>
     </div>
 </div>
 <script>
+    // Initialize call
     var svg = Initialize('drawArea');
+    // Start
     StartStopGame();
 </script>
 </body>
