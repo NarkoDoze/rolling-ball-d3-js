@@ -8,7 +8,7 @@
 <script>
     // Ball Object Define
     function Ball(svg, x, y, id, color, aoa, weight, height) {
-        // Ball object position X, Y
+       // Ball object position X, Y
         // Assigned in Quadrant 4
         this.posX = x;
         this.posY = y;
@@ -23,8 +23,6 @@
         this.svg = svg;
         // Inherence id for each ball
         this.id = id;
-        // The ball go in this angle(aoa)
-        this.aoa = aoa;
         // Defined for other object ( Line, turnel, cross symbol)
         this.weight = weight;
         this.height = height;
@@ -45,8 +43,7 @@
         this.crossY = 80;
 
         // Not defined case
-        if (!this.aoa)
-            this.aoa = Math.PI / 7;
+        this.aoa = 0;
         if (!this.weight)
             this.weight = 10;
         this.radius = this.weight;
@@ -86,16 +83,11 @@
         // And redraw
         this.SpeedSettings = function (newjumpSize) {
             thisobj.jumpSize = newjumpSize;
-            if (thisobj.aoa >= 0){
-                // Init value
-                thisobj.posX = thisobj.initialPosX;
-                thisobj.posY = thisobj.initialPosY;
-            }
-            else{
-                // If angle is unsigned -> the ball goes down 
-                thisobj.posX = thisobj.initialPosX;
-                thisobj.posY = thisobj.height - thisobj.initialPosY;
-            }
+            // if (thisobj.aoa >= 0){
+            // Init value
+            thisobj.posX = thisobj.initialPosX;
+            thisobj.posY = thisobj.initialPosY;
+            // }
             // Recalculate
             thisobj.vx = Math.cos(thisobj.aoa) * newjumpSize; // velocity x
             thisobj.vy = Math.sin(thisobj.aoa) * newjumpSize; // velocity y
@@ -125,22 +117,6 @@
             thisobj.LineDraw();
         };
 
-        // Not used in this version
-        this.refresh = function () {
-            if (thisobj.aoa >= 0){
-                    thisobj.posX = thisobj.initialPosX;
-                    thisobj.posY = thisobj.initialPosY;
-            }
-            else{
-                thisobj.posX = thisobj.initialPosX;
-                thisobj.posY = thisobj.height - thisobj.initialPosY;
-            }
-            thisobj.vx = Math.cos(thisobj.aoa) * thisobj.jumpSize;
-            thisobj.vy = Math.sin(thisobj.aoa) * thisobj.jumpSize;
-            thisobj.Draw();
-            thisobj.LineDraw();
-        };
-
         // line, tunnel, cross symbol
         // All of things are consist of line
         // Draw for each case
@@ -155,96 +131,22 @@
             var cross = svg.selectAll('#' + thisobj.id + "cross")
                         .data(thisobj.data);
 
-            // Define each position of start and end point of tunnel, slope
-            if (thisobj.aoa > 0) {
-                this.pprime = 30 - thisobj.radius.toFixed(5) * Math.sin(thisobj.aoa);
-                this.qprime = 30 + thisobj.radius.toFixed(5) * Math.cos(thisobj.aoa);
-                this.ppprime = this.pprime + (480.0 - thisobj.qprime) / Math.tan(thisobj.aoa);
-                this.pqprime = 480.0;
-            }
-            if (thisobj.aoa < 0){
-                this.pprime = 30;
-                this.qprime = 450 + thisobj.radius.toFixed(5) / Math.cos(-1 * thisobj.aoa);
-                this.ppprime = 450 / Math.tan(-1 * thisobj.aoa) + 30 + 100 ;
-                this.pqprime = thisobj.radius / Math.cos(-1 * thisobj.aoa) - 100 * Math.tan(-1 * thisobj.aoa);
-            }
-            if (thisobj.aoa == -1 * Math.PI / 2) {
-               this.pprime = 30 + thisobj.radius + 400;
-               this.qprime = 0;
-               this.ppprime = 30 + thisobj.radius + 400;
-               this.pqprime = 480;
-            }
-            if (thisobj.aoa == Math.PI / 2) {
-               this.pprime = 30 + thisobj.radius + 400;
-               this.qprime = 0;
-               this.ppprime = 30 + thisobj.radius + 400;
-               this.pqprime = 480;
-            }
-            if (thisobj.aoa == 0) {
-               this.pprime = 30;
-               this.qprime = 30 + thisobj.radius + 200;
-               this.ppprime = 1000;
-               this.pqprime = 30 + thisobj.radius + 200;
-            }
+            // if (thisobj.aoa == 0) {
+            this.pprime = 30;
+            this.qprime = 30 + thisobj.radius + 200;
+            this.ppprime = 1000;
+            this.pqprime = 30 + thisobj.radius + 200;
+            // }
 
             var crossX, crossY = 1;
-            if (thisobj.aoa == -1 * Math.PI / 2){
-               this.tpprime = 30 + 400;
-               this.tqprime = 280;
-               this.tppprime = 30 + 400;
-               this.tpqprime = -29;
-               this.crossX = 30 + 400;
-               this.crossY = 80;
-            }
-            if (thisobj.aoa == Math.PI / 2){
-                this.tpprime = 30 + 400;
-                this.tqprime = 200;
-                this.tppprime = 30 + 400;
-                this.tpqprime = 490;
-                this.crossX = 30 + 400;
-                this.crossY = 400;
-            }
-            if (thisobj.aoa == Math.PI / 3){
-                this.tpprime = 115;
-                this.tqprime = 177.2243186;
-                this.tppprime = 346.5;
-                this.tpqprime = 578.194080595551;
-                this.crossX = 215;
-                this.crossY = 350.4293994;
-            }
-            // TOOO LOOOOOONG
-            if (thisobj.aoa == -1 * Math.PI / 3){
-               this.tpprime = 115;
-               this.tqprime = 302.7756814;
-               this.tppprime = 310;
-               this.tpqprime = -34.974226119286236;
-               this.crossX = 215;
-               this.crossY = 129.5706006;
-            }
-            if (thisobj.aoa == Math.PI / 6){
-               this.tpprime = 177.2243186;
-               this.tqprime = 115;
-               this.tppprime = 865.7145146519857;
-               this.tpqprime = 512.5;
-               this.crossX = 350.4293994;
-               this.crossY = 215;
-            }
-            if (thisobj.aoa == -1 * Math.PI / 6){
-                this.tpprime = 177.2243186;
-                this.tqprime = 365;
-                this.tppprime = 848.3940065762969;
-                this.tpqprime = -22.499999999999996;
-                this.crossX = 350.4293994;
-                this.crossY = 265;
-            }
-            if (thisobj.aoa == 0){
-               this.tpprime = 200;
-               this.tqprime = 30 + 200;
-               this.tppprime = 1000;
-               this.tpqprime = 30 + 200;
-               this.crossX = 400;
-               this.crossY = 30 + 200;
-            }
+            // if (thisobj.aoa == 0){
+            this.tpprime = 200;
+            this.tqprime = 30 + 200;
+            this.tppprime = 1000;
+            this.tpqprime = 30 + 200;
+            this.crossX = 400;
+            this.crossY = 30 + 200;
+            // }
 
             // Draw slope with silver color
             // Use pprime, qprime, ppprime, pqprime
@@ -307,14 +209,9 @@
                 .attr({"id" : thisobj.id, 'class' : 'ball', 'r' : thisobj.radius, 'weight' : thisobj.weight})
                 .style("fill", thisobj.color);
             
-            if (thisobj.aoa == Math.PI / 2 || thisobj.aoa == -1 * Math.PI / 2){
-                // Change Value when ball 90 or -90 to middle
-                thisobj.posX = 430;
-            }
-            if (thisobj.aoa == 0){
-                // Change Value when ball 0 to middle
-                thisobj.posY = 230;
-            }
+            // if (thisobj.aoa == 0){
+            thisobj.posY = 230;
+            //}
             ball
                 .attr("cx", thisobj.posX)
                 .attr("cy", thisobj.posY);
@@ -355,8 +252,10 @@
 
         // Only one Ball pushed in this project
         balls.push(new Ball(svg, 30, 30, 'n2', 'dimgray', Math.PI / 2, 20, height));
+        balls.push(new Ball(svg, 30, 30, 'n3', 'dimgray', Math.PI / 2, 20, height));
         // Speed Setted by rand
         balls[0].SpeedSettings(randgame() + 4);
+        balls[1].SpeedSettings(-5);
 
         // Draw!
         for (var i = 0; i < balls.length; ++i) {
@@ -501,9 +400,8 @@
             startStopFlag = null;
             setTimeout(function () {
                 // All balls setted with new value
-                for (var i = 0; i < balls.length; ++i) {
-                    balls[i].SpeedSettings(newjumpSize);
-                }
+                balls[0].SpeedSettings(newjumpSize);
+                balls[1].SpeedSettings(-5);
                 StartStopGame();
             }, 500);
     }
@@ -523,19 +421,11 @@
             }
             // Define new rand speed
             balls[0].SpeedSettings(randgame() + 4);
+            balls[1].SpeedSettings(-5);
             StartStopGame();
             document.getElementById('startStop').innerHTML = 'Start';
         }, 500);
     }
-//  Not used in this version
-//  function Refresh(){
-//      if (startStopFlag != null){
-//          startStopFlag = null;
-//          StartStopGame();
-//      }
-//      balls[0].refresh();
-//      document.getElementById('diff').innerHTML = balls[0].Diff().toString();
-//  }
 
     // Just download anglearr, speedarr, diffarr with csv
     function download_csv() {
